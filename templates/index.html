@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#10241e">
+    <meta name="description" content="Panel de control de ventas, costos y rentabilidad del restaurante.">
+    <title>Panel de gestión | Restaurante</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Enlace a nuestro archivo CSS separado -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css', v=2) }}">
+</head>
+<body>
+
+<nav class="navbar navbar-dark app-navbar">
+    <div class="container app-container">
+        <a class="navbar-brand app-brand" href="{{ url_for('index') }}">
+            <span class="brand-mark" aria-hidden="true">R</span>
+            <span>
+                <span class="brand-title">Restaurante</span>
+                <span class="brand-caption">Panel de gestión</span>
+            </span>
+        </a>
+        <form class="month-filter" method="GET" action="/">
+            <label for="monthPicker">Periodo</label>
+            <input id="monthPicker" type="month" name="mes" class="form-control" value="{{ mes_actual }}" onchange="this.form.submit()">
+        </form>
+    </div>
+</nav>
+
+<main class="container app-container pb-5">
+    <!-- TARJETAS DE RESUMEN MENSUAL -->
+    <section class="dashboard-heading">
+        <div>
+            <p class="section-kicker">VISTA GENERAL</p>
+            <h1>Balance del mes <span>{{ mes_actual }}</span></h1>
+            <p class="section-description">Un vistazo rápido al rendimiento de tu restaurante.</p>
+        </div>
+        <div class="period-chip"><span class="status-dot"></span> Resumen mensual</div>
+    </section>
+
+    <section class="row g-3 mb-4 metrics-grid" aria-label="Resumen financiero mensual">
+        <div class="col-6 col-lg">
+            <div class="card metric-card metric-dishes p-3 h-100">
+                <div class="metric-topline"><small>Platos vendidos</small><span class="metric-icon">↗</span></div>
+                <h3 class="fw-bold mt-2 mb-0">{{ resumen.platos_vendidos }}</h3>
+                <small class="metric-note">Unidades este mes</small>
+            </div>
+        </div>
+        <div class="col-6 col-lg">
+            <div class="card metric-card metric-investment p-3 h-100">
+                <div class="metric-topline"><small>Valor invertido</small><span class="metric-icon">−</span></div>
+                <h3 class="fw-bold mt-2 mb-0">${{ "{:,.0f}".format(resumen.inversion) }}</h3>
+                <small class="metric-note">Costos registrados</small>
+            </div>
+        </div>
+        <div class="col-6 col-lg">
+            <div class="card metric-card metric-revenue p-3 h-100">
+                <div class="metric-topline"><small>Venta neta</small><span class="metric-icon">＋</span></div>
+                <h3 class="fw-bold mt-2 mb-0">${{ "{:,.0f}".format(resumen.venta_neta) }}</h3>
+                <small class="metric-note">Ingresos del periodo</small>
+            </div>
+        </div>
+        <div class="col-6 col-lg">
+            <div class="card metric-card metric-commission p-3 h-100">
+                <div class="metric-topline"><small>Comisión · {{ resumen.porcentaje_comision }}%</small><span class="metric-icon">%</span></div>
+                <h3 class="fw-bold mt-2 mb-0">${{ "{:,.0f}".format(resumen.pago_vendedor) }}</h3>
+                <small class="metric-note">
+                    {% if resumen.venta_neta > 999999 %}Superó $999.999 (20%){% else %}Hasta $999.999 (10%){% endif %}
+                </small>
+            </div>
+        </div>
+        <div class="col-12 col-lg">
+            <div class="card metric-card metric-profit p-3 h-100 text-white">
+                <div class="metric-topline"><small>Ganancia libre final</small><span class="metric-icon">✓</span></div>
+                <h3 class="fw-bold mt-2 mb-1">${{ "{:,.0f}".format(resumen.ganancia_final) }}</h3>
+                <small class="metric-note">Antes de comisión: ${{ "{:,.0f}".format(resumen.ganancia_bruta) }}</small>
+            </div>
+        </div>
+    </section>
+
+    <!-- PESTAÑAS DE NAVEGACIÓN -->
+    <ul class="nav nav-tabs app-tabs mb-4" id="myTab" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active fw-bold" data-bs-toggle="tab" data-bs-target="#ventas">🛒 Registrar Venta</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#platos">🍽️ Platos y Ganancia por Plato</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-bold" data-bs-toggle="tab" data-bs-target="#insumos">🥩 Productos y Adiciones</button>
+        </li>
+    </ul>
+
+    <div class="tab-content">
+        <!-- PESTAÑA 1: REGISTRAR VENTA -->
+        <div class="tab-pane fade show active" id="ventas">
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="card p-4">
+                        <h5 class="mb-3">Registrar Pedido Vendido</h5>
+                        <form method="POST" action="{{ url_for('registrar_venta') }}">
+                            <div class="mb-3">
+                                <label class="form-label">Seleccionar Plato</label>
+                                <select name="plato_id" class="form-select" required>
+                                    {% for p in platos %}
+                                    <option value="{{ p.id }}">
+                                        {{ p.nombre }} - ${{ "{:,.0f}".format(p.precio_venta) }} (Costo: ${{ "{:,.0f}".format(p.costo_plato) }})
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Cantidad de Platos</label>
+                                <input type="number" name="cantidad" class="form-control" value="1" min="1" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Adiciones Extra al Plato (Opcional)</label>
+                                {% for a in adiciones %}
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="adiciones" value="{{ a.id }}" id="ad{{ a.id }}">
+                                    <label class="form-check-label" for="ad{{ a.id }}">
+                                        {{ a.nombre }} (+${{ "{:,.0f}".format(a.precio_extra) }} | Inversión: ${{ "{:,.0f}".format(a.costo_inversion) }})
+                                    </label>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Guardar Venta</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-7">
+                    <div class="card p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Ventas Registradas ({{ mes_actual }})</h5>
+                            <!-- Botón para vaciar todo el historial de ventas -->
+                            <form method="POST" action="{{ url_for('limpiar_ventas') }}" onsubmit="return confirm('¿Seguro que deseas borrar TODAS las ventas registradas? (Tus platos e ingredientes NO se borrarán)');">
+                                <button type="submit" class="btn btn-sm btn-outline-danger">🗑️ Vaciar Historial</button>
+                            </form>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Plato / Adiciones</th>
+                                        <th>Cant.</th>
+                                        <th>Invertido</th>
+                                        <th>Venta</th>
+                                        <th>Ganancia</th>
+                                        <th>Acción</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for v in historial_ventas %}
+                                    <tr>
+                                        <td><small>{{ v.fecha }}</small></td>
+                                        <td>
+                                            <strong>{{ v.plato_nombre }}</strong>
+                                            {% if v.adiciones_info %}<br><small class="text-muted">+ {{ v.adiciones_info }}</small>{% endif %}
+                                        </td>
+                                        <td>{{ v.cantidad }}</td>
+                                        <td class="text-danger">${{ "{:,.0f}".format(v.inversion_total) }}</td>
+                                        <td class="text-primary fw-bold">${{ "{:,.0f}".format(v.venta_total) }}</td>
+                                        <td class="text-success fw-bold">${{ "{:,.0f}".format(v.venta_total - v.inversion_total) }}</td>
+                                        <td>
+                                            <!-- Botón para eliminar una sola venta -->
+                                            <form method="POST" action="{{ url_for('eliminar_venta', venta_id=v.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Eliminar este registro">✖</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="7" class="text-center text-muted">No hay ventas registradas en este mes.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 2: PLATOS Y GANANCIA POR PLATO -->
+        <div class="tab-pane fade" id="platos">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card p-4 mb-3">
+                        <h5>Agregar Más Platos de Comida</h5>
+                        <form method="POST" action="{{ url_for('agregar_plato') }}">
+                            <div class="mb-2">
+                                <label class="form-label">Nombre del Plato</label>
+                                <input type="text" name="nombre" class="form-control" placeholder="Ej: Alitas BBQ x12" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Precio Final al Cliente (COP)</label>
+                                <input type="number" name="precio_venta" class="form-control" placeholder="28000" required>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100">Crear Plato</button>
+                        </form>
+                    </div>
+
+                    <div class="card p-4">
+                        <h5>Armar Costo del Plato</h5>
+                        <small class="text-muted mb-2">Asigna los productos que lleva cada plato para calcular su inversión y ganancia.</small>
+                        <form method="POST" action="{{ url_for('asignar_ingrediente') }}">
+                            <div class="mb-2">
+                                <label class="form-label">Seleccionar Plato</label>
+                                <select name="plato_id" class="form-select" required>
+                                    {% for p in platos %}
+                                    <option value="{{ p.id }}">{{ p.nombre }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Producto / Ingrediente</label>
+                                <select name="ingrediente_id" class="form-select" required>
+                                    {% for i in ingredientes %}
+                                    <option value="{{ i.id }}">{{ i.nombre }} (${{ "{:,.0f}".format(i.costo_unitario) }} x {{ i.unidad }})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Cantidad usada en el plato</label>
+                                <input type="number" step="0.01" name="cantidad" class="form-control" placeholder="Ej: 1" required>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100">Asignar al Plato</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card p-4">
+                        <h5 class="mb-3">Cálculo de Ganancia por Plato</h5>
+                        <table class="table table-bordered align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Plato</th>
+                                    <th>Productos / Ingredientes</th>
+                                    <th>Valor Invertido</th>
+                                    <th>Precio Cliente</th>
+                                    <th>Ganancia x Plato</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in platos %}
+                                <tr>
+                                    <td class="fw-bold">{{ p.nombre }}</td>
+                                    <td><small>{{ p.detalle_ingredientes or 'Sin productos asignados aún' }}</small></td>
+                                    <td class="text-danger fw-bold">${{ "{:,.0f}".format(p.costo_plato) }}</td>
+                                    <td class="text-primary fw-bold">${{ "{:,.0f}".format(p.precio_venta) }}</td>
+                                    <td class="text-success fw-bold">${{ "{:,.0f}".format(p.ganancia_plato) }}</td>
+                                    <td>
+                                        <div class="d-flex gap-1">
+                                            <form method="POST" action="{{ url_for('limpiar_receta', plato_id=p.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-outline-secondary" title="Quitar ingredientes del plato">🔄</button>
+                                            </form>
+                                            <form method="POST" action="{{ url_for('eliminar_plato', plato_id=p.id) }}" onsubmit="return confirm('¿Eliminar este plato?');">
+                                                <button type="submit" class="btn btn-sm btn-danger" title="Eliminar plato">✖</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <small class="text-muted">💡 El botón <strong>🔄</strong> vacía los ingredientes asignados a ese plato si te equivocaste armando la receta. El botón <strong>✖</strong> borra el plato por completo.</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PESTAÑA 3: PRODUCTOS Y ADICIONES -->
+        <div class="tab-pane fade" id="insumos">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card p-4 mb-4">
+                        <h5>1. Ingresar Producto y su Valor</h5>
+                        <p class="text-muted small">Registra el precio de cada ingrediente/insumo para compararlo con el precio del plato.</p>
+                        <form method="POST" action="{{ url_for('agregar_ingrediente') }}" class="row g-2 mb-3">
+                            <div class="col-md-5">
+                                <input type="text" name="nombre" class="form-control" placeholder="Ej: Pollo desmechado / Pan" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="text" name="unidad" class="form-control" placeholder="Ej: porción / und" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" step="0.01" name="costo" class="form-control" placeholder="Valor COP (Ej: 4500)" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">Guardar Producto</button>
+                            </div>
+                        </form>
+                        <table class="table table-sm align-middle">
+                            <thead><tr><th>Producto</th><th>Unidad</th><th>Valor Invertido</th><th></th></tr></thead>
+                            <tbody>
+                                {% for i in ingredientes %}
+                                <tr>
+                                    <td>{{ i.nombre }}</td>
+                                    <td>{{ i.unidad }}</td>
+                                    <td>${{ "{:,.0f}".format(i.costo_unitario) }}</td>
+                                    <td class="text-end">
+                                        <form method="POST" action="{{ url_for('eliminar_ingrediente', ingrediente_id=i.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar producto">✖</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" class="text-muted text-center">No hay productos registrados aún.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h5>2. Agregar Adiciones a Plato (Cobrando Extra)</h5>
+                        <p class="text-muted small">Adiciones que suman tanto a la inversión como al precio final pagado por el cliente.</p>
+                        <form method="POST" action="{{ url_for('agregar_adicion') }}" class="row g-2 mb-3">
+                            <div class="col-md-5">
+                                <input type="text" name="nombre" class="form-control" placeholder="Ej: Tocineta ahumada" required>
+                            </div>
+                            <div class="col-md-3">
+                                <input type="number" name="costo_inversion" class="form-control" placeholder="Costo (2000)" required>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="number" name="precio_extra" class="form-control" placeholder="Cobro Extra (5000)" required>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-warning w-100">Guardar Adición</button>
+                            </div>
+                        </form>
+                        <table class="table table-sm align-middle">
+                            <thead><tr><th>Adición</th><th>Inversión</th><th>Precio Extra</th><th>Ganancia</th><th></th></tr></thead>
+                            <tbody>
+                                {% for a in adiciones %}
+                                <tr>
+                                    <td>{{ a.nombre }}</td>
+                                    <td class="text-danger">${{ "{:,.0f}".format(a.costo_inversion) }}</td>
+                                    <td class="text-primary">${{ "{:,.0f}".format(a.precio_extra) }}</td>
+                                    <td class="text-success fw-bold">${{ "{:,.0f}".format(a.precio_extra - a.costo_inversion) }}</td>
+                                    <td class="text-end">
+                                        <form method="POST" action="{{ url_for('eliminar_adicion', adicion_id=a.id) }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar adición">✖</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

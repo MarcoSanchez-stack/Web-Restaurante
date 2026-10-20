@@ -1,0 +1,475 @@
+:root {
+    color-scheme: dark;
+    --ink: #e5e8e5;
+    --muted: #929a94;
+    --line: #303632;
+    --surface: #191d1b;
+    --surface-raised: #202522;
+    --page: #111412;
+    --accent: #b4c2b6;
+    --accent-strong: #d0dad1;
+    --green-dark: #0c0f0d;
+}
+
+body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.94rem;
+    font-variant-numeric: tabular-nums;
+    min-height: 100vh;
+}
+
+.app-container {
+    max-width: 1440px;
+}
+
+.app-navbar {
+    background: var(--green-dark);
+    border-bottom: 1px solid #252a26;
+    margin-bottom: 2rem;
+    padding: 0.9rem 0;
+}
+
+.app-brand {
+    align-items: center;
+    display: inline-flex;
+    gap: 0.8rem;
+    margin: 0;
+}
+
+.brand-mark {
+    align-items: center;
+    background: #242a26;
+    border: 1px solid #3b433d;
+    border-radius: 10px;
+    color: var(--accent-strong);
+    display: inline-flex;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.95rem;
+    font-weight: 600;
+    height: 40px;
+    justify-content: center;
+    width: 40px;
+}
+
+.brand-title,
+.brand-caption {
+    display: block;
+}
+
+.brand-title {
+    color: #f0f2ef;
+    font-size: 0.97rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}
+
+.brand-caption {
+    color: #8b948e;
+    font-size: 0.73rem;
+    font-weight: 400;
+    margin-top: 0.2rem;
+}
+
+.month-filter {
+    align-items: center;
+    display: flex;
+    gap: 0.7rem;
+}
+
+.month-filter label {
+    color: #a3aaa5;
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+.month-filter .form-control {
+    background: #191d1b;
+    border-color: #343a36;
+    color: #e5e8e5;
+    min-width: 165px;
+}
+
+.month-filter .form-control::-webkit-calendar-picker-indicator {
+    filter: invert(0.8);
+}
+
+.dashboard-heading {
+    align-items: flex-end;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.4rem;
+}
+
+.section-kicker {
+    color: #a6b5a9;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    margin-bottom: 0.45rem;
+}
+
+.dashboard-heading h1 {
+    color: #edf0ed;
+    font-size: clamp(1.45rem, 2.4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.055em;
+    margin: 0;
+}
+
+.dashboard-heading h1 span {
+    color: #a1aaa3;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.58em;
+    font-weight: 400;
+    letter-spacing: -0.04em;
+    margin-left: 0.4rem;
+}
+
+.section-description {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin: 0.45rem 0 0;
+}
+
+.period-chip {
+    align-items: center;
+    background: #1b211d;
+    border: 1px solid #323a34;
+    border-radius: 7px;
+    color: #c1cbc3;
+    display: inline-flex;
+    font-size: 0.74rem;
+    font-weight: 600;
+    gap: 0.5rem;
+    padding: 0.48rem 0.7rem;
+    white-space: nowrap;
+}
+
+.status-dot {
+    background: #9eaf9f;
+    border-radius: 50%;
+    height: 6px;
+    width: 6px;
+}
+
+.metrics-grid {
+    margin-bottom: 2rem !important;
+}
+
+.card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.metric-card {
+    border-left: 1px solid var(--line);
+    min-height: 128px;
+}
+
+.metric-dishes,
+.metric-investment,
+.metric-revenue,
+.metric-commission {
+    border-left-color: var(--line);
+}
+
+.metric-profit {
+    background: #1d2420;
+    border: 1px solid #39443c;
+}
+
+.metric-topline {
+    align-items: center;
+    color: #a2aaa4;
+    display: flex;
+    font-size: 0.75rem;
+    font-weight: 600;
+    justify-content: space-between;
+}
+
+.metric-icon {
+    align-items: center;
+    background: #242a26;
+    border: 1px solid #303732;
+    border-radius: 7px;
+    color: #abb6ad;
+    display: inline-flex;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 0.78rem;
+    font-weight: 500;
+    height: 27px;
+    justify-content: center;
+    width: 27px;
+}
+
+.metric-card h3 {
+    color: #edf0ed;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: clamp(1.1rem, 1.55vw, 1.4rem);
+    font-weight: 500;
+    letter-spacing: -0.055em;
+}
+
+.metric-note {
+    color: #89928c;
+    display: block;
+    font-size: 0.7rem;
+    line-height: 1.4;
+    margin-top: 0.35rem;
+}
+
+.metric-profit .metric-topline,
+.metric-profit h3,
+.metric-profit .metric-note {
+    color: #e3e9e3;
+}
+
+.metric-profit .metric-topline {
+    color: #b5c0b7;
+}
+
+.metric-profit .metric-icon {
+    background: #2a332d;
+    border-color: #414c43;
+    color: #d1dbd2;
+}
+
+.app-tabs {
+    border-bottom: 1px solid var(--line);
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+}
+
+.app-tabs .nav-link {
+    border: 1px solid transparent;
+    border-radius: 7px 7px 0 0;
+    color: #a1a9a3;
+    font-size: 0.84rem;
+    padding: 0.75rem 0.95rem;
+    white-space: nowrap;
+}
+
+.app-tabs .nav-link:hover {
+    background: #1b201d;
+    border-color: transparent;
+    color: #e1e6e1;
+}
+
+.app-tabs .nav-link.active {
+    background: var(--surface);
+    border-color: var(--line) var(--line) var(--surface);
+    border-top: 1px solid #abb9ad;
+    color: #edf0ed;
+    font-weight: 600;
+}
+
+.tab-content .row {
+    --bs-gutter-y: 1.25rem;
+}
+
+.tab-content .card {
+    padding: clamp(1rem, 2vw, 1.5rem) !important;
+}
+
+.tab-content h5 {
+    color: #e4e8e4;
+    font-size: 0.98rem;
+    font-weight: 650;
+    letter-spacing: -0.025em;
+}
+
+.form-label {
+    color: #c0c7c1;
+    font-size: 0.82rem;
+    font-weight: 600;
+}
+
+.form-control,
+.form-select {
+    background-color: #202522;
+    border-color: #383f3a;
+    border-radius: 7px;
+    color: #e2e7e2;
+    min-height: 41px;
+}
+
+.form-control::placeholder {
+    color: #78817a;
+}
+
+.form-select {
+    --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23aab3ac' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+
+.form-control:focus,
+.form-select:focus {
+    background-color: #222824;
+    border-color: #89998c;
+    box-shadow: 0 0 0 0.18rem rgba(157, 174, 160, 0.13);
+    color: #f0f2f0;
+}
+
+.form-check {
+    margin-bottom: 0.45rem;
+}
+
+.form-check-input {
+    background-color: #202522;
+    border-color: #555e57;
+}
+
+.form-check-input:checked {
+    background-color: #87998a;
+    border-color: #87998a;
+}
+
+.form-check-label {
+    color: #b8c0b9;
+    font-size: 0.82rem;
+}
+
+.btn {
+    border-radius: 7px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    padding: 0.56rem 0.85rem;
+}
+
+.btn-primary,
+.btn-success,
+.btn-dark {
+    background: #d1d8d1;
+    border-color: #d1d8d1;
+    color: #171b18;
+}
+
+.btn-primary:hover,
+.btn-success:hover,
+.btn-dark:hover {
+    background: #e0e5e0;
+    border-color: #e0e5e0;
+    color: #111411;
+}
+
+.btn-warning {
+    background: #a99f7e;
+    border-color: #a99f7e;
+    color: #191a17;
+}
+
+.btn-outline-danger {
+    border-color: #664b48;
+    color: #c59993;
+}
+
+.btn-outline-danger:hover,
+.btn-danger {
+    background: #5b3d39;
+    border-color: #72504b;
+    color: #f0dfdc;
+}
+
+.table {
+    --bs-table-bg: transparent;
+    --bs-table-color: #d0d6d0;
+    --bs-table-hover-bg: #222824;
+    --bs-table-hover-color: #edf0ed;
+    --bs-table-striped-bg: #1d221f;
+    --bs-table-striped-color: #d0d6d0;
+    margin-bottom: 0.35rem;
+    vertical-align: middle;
+}
+
+.table thead th {
+    background: #202522;
+    border-bottom-color: #3a423c;
+    color: #aeb8b0;
+    font-size: 0.69rem;
+    font-weight: 600;
+    letter-spacing: 0.055em;
+    padding: 0.75rem 0.7rem;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.table tbody td {
+    border-color: #2b312d;
+    font-size: 0.82rem;
+    padding: 0.7rem;
+}
+
+.table-dark th {
+    background: #252b27;
+    color: #d7ddd7;
+}
+
+.text-muted {
+    color: var(--muted) !important;
+}
+
+.text-danger {
+    color: #c59993 !important;
+}
+
+.text-primary {
+    color: #b8c4bb !important;
+}
+
+.text-success {
+    color: #a9b9ac !important;
+}
+
+.text-warning {
+    color: #c5b98e !important;
+}
+
+@media (max-width: 767.98px) {
+    .app-navbar {
+        margin-bottom: 1.4rem;
+    }
+
+    .dashboard-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.9rem;
+    }
+
+    .metrics-grid > div {
+        min-width: 50%;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding-left: 0.55rem;
+        padding-right: 0.55rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .app-brand {
+        gap: 0.55rem;
+    }
+
+    .brand-mark {
+        height: 36px;
+        width: 36px;
+    }
+
+    .month-filter {
+        align-items: flex-end;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .month-filter .form-control {
+        min-width: 145px;
+        min-height: 38px;
+    }
+}
